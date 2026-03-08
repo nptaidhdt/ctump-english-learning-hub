@@ -1,0 +1,7 @@
+{
+  "name": "CTUMP English Learning Hub",
+  "description": "Nền tảng học tiếng Anh thông minh dành cho sinh viên Y Dược Cần Thơ, hỗ trợ AI trích xuất bài giảng và tạo bài tập tự động.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
