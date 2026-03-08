@@ -162,7 +162,7 @@ name:user.name
 });
 
 /* =========================
-BASIC TEST ROUTE
+HEALTH CHECK
 ========================= */
 
 app.get("/api/health",(req,res)=>{
@@ -170,37 +170,35 @@ res.json({status:"ok"});
 });
 
 /* =========================
-START SERVER (Railway ready)
+START SERVER (Railway Ready)
 ========================= */
 
 async function startServer(){
 
 app.use(express.static("public"));
 
-if(process.env.NODE_ENV!=="production"){
+if(process.env.NODE_ENV !== "production"){
 
-const vite=await createViteServer({
+const vite = await createViteServer({
 server:{middlewareMode:true},
 appType:"spa"
 });
 
 app.use(vite.middlewares);
 
-app.use("*",async(req,res)=>{
+app.use("*", async (req,res)=>{
 const url=req.originalUrl;
 
 try{
 
-let template=fs.readFileSync(
+let template = fs.readFileSync(
 path.resolve(__dirname,"index.html"),
 "utf-8"
 );
 
-template=await vite.transformIndexHtml(url,template);
+template = await vite.transformIndexHtml(url,template);
 
-res.status(200).set({
-"Content-Type":"text/html"
-}).end(template);
+res.status(200).set({"Content-Type":"text/html"}).end(template);
 
 }catch(e:any){
 vite.ssrFixStacktrace(e);
@@ -211,17 +209,28 @@ res.status(500).end(e);
 
 }else{
 
-const distPath=path.join(__dirname,"dist");
+const distPath = path.resolve(__dirname,"dist");
+
+if(!fs.existsSync(distPath)){
+console.error("dist folder not found. Did you run vite build?");
+}
 
 app.use(express.static(distPath));
 
 app.get("*",(req,res)=>{
-res.sendFile(path.join(distPath,"index.html"));
+const indexPath = path.join(distPath,"index.html");
+
+if(fs.existsSync(indexPath)){
+res.sendFile(indexPath);
+}else{
+res.status(500).send("index.html not found in dist folder");
+}
+
 });
 
 }
 
-const PORT=process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT,"0.0.0.0",()=>{
 console.log("Server running on port "+PORT);
